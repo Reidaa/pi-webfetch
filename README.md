@@ -36,6 +36,8 @@ Behavior:
   `pi` user agent when Cloudflare serves a challenge.
 - Output longer than pi's tool limits is truncated; the full content is written
   to a temp file and its path is reported to the model.
+- In the TUI, the fetched URL appears beside the tool call and output stays
+  collapsed until you press `Ctrl+O`.
 
 ## Development
 

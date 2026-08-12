@@ -9,8 +9,10 @@ import {
   DEFAULT_MAX_LINES,
   type ExtensionAPI,
   formatSize,
+  keyHint,
   truncateHead,
 } from "@earendil-works/pi-coding-agent";
+import { Text } from "@earendil-works/pi-tui";
 import { mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -33,7 +35,7 @@ Usage notes:
 export default function webfetchExtension(pi: ExtensionAPI) {
   pi.registerTool({
     name: "webfetch",
-    label: "Fetch",
+    label: "webfetch",
     description,
     promptSnippet: "Fetch a web page as markdown, text, or HTML",
     parameters: Type.Object({
@@ -85,6 +87,25 @@ export default function webfetchExtension(pi: ExtensionAPI) {
           truncated: truncation.truncated,
         },
       };
+    },
+
+    renderCall(args, theme) {
+      const hint =
+        theme.fg("dim", " (") + keyHint("app.tools.expand", "to expand") + theme.fg("dim", ")");
+      return new Text(
+        theme.fg("toolTitle", theme.bold("webfetch")) + " " + theme.fg("accent", args.url) + hint,
+        0,
+        0,
+      );
+    },
+
+    renderResult(result, { expanded }, theme, context) {
+      if (!expanded && !context.isError) return new Text("", 0, 0);
+      const text = result.content
+        .filter((part) => part.type === "text")
+        .map((part) => part.text)
+        .join("\n");
+      return new Text(theme.fg(context.isError ? "error" : "toolOutput", text), 0, 0);
     },
   });
 }
